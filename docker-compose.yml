@@ -1,0 +1,10 @@
+services:
+  php:
+    container_name: php7.3_container
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html/src
+      - ./tests:/var/www/html/tests
+
