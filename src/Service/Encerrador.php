@@ -3,12 +3,16 @@
 namespace Alura\Leilao\Service;
 
 use Alura\Leilao\Dao\Leilao as LeilaoDao;
+use Error;
 
 class Encerrador
 {
     private $leilaoDao;
-    public function __construct(LeilaoDao $leilaoDao) {
+    private $enviadorEmail;
+    public function __construct(LeilaoDao $leilaoDao, EnviadorEmail $enviadorEmail)
+    {
         $this->leilaoDao = $leilaoDao;
+        $this->enviadorEmail = $enviadorEmail;
     }
     public function encerra()
     {
@@ -16,8 +20,14 @@ class Encerrador
 
         foreach ($leiloes as $leilao) {
             if ($leilao->temMaisDeUmaSemana()) {
-                $leilao->finaliza();
-                $this->leilaoDao->atualiza($leilao);
+                try {
+
+                    $leilao->finaliza();
+                    $this->leilaoDao->atualiza($leilao);
+                    $this->enviadorEmail->notificaTerminoLeilao($leilao);
+                } catch (\DomainException $e) {
+                    error_log($e->getMessage());
+                }
             }
         }
     }
